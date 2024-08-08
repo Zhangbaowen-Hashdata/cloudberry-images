@@ -1,3 +1,4 @@
+
 # cloudberry-images
 
 ## Overview
@@ -13,15 +14,17 @@ cloudberry-images
 │       └── build
 │           └── rocky9
 │               ├── README.md
-│               ├── configs
-│               │   ├── 90-db-limits.conf
-│               │   └── 90-db-sysctl.conf
 │               ├── main.pkr.hcl
 │               ├── scripts
-│               │   ├── gpadmin-setup.sh
-│               │   ├── install-packages.sh
-│               │   ├── post-build.sh
-│               │   └── pre-build.sh
+│               │   ├── gpadmin-configure-environment.sh
+│               │   ├── packer-build-and-test.sh
+│               │   ├── run-tests.sh
+│               │   ├── system_add_cbdb_build_rpm_dependencies.sh
+│               │   ├── system_add_gpadmin_ulimits.sh
+│               │   ├── system_add_kernel_configs.sh
+│               │   ├── system_adduser_gpadmin.sh
+│               │   ├── system_disable_SELinux.sh
+│               │   └── system_disable_SELinux.sh
 │               └── tests
 │                   ├── requirements.txt
 │                   └── testinfra
@@ -60,37 +63,45 @@ cloudberry-images
 
 ## Usage
 
-1. **Run pre-build script**
+1. **Run packer-build-and-test.sh script**
 
    This script generates a new SSH key pair, validates the Packer template, and initiates the Packer build process.
 
    ```bash
-   ./scripts/pre-build.sh
+   ./scripts/packer-build-and-test.sh
    ```
 
-2. **Run post-build script (if needed)**
+   ### Additional Notes:
+   - The script checks for the availability of required commands (`pytest`, `packer`, `aws`, `jq`, `nc`, `curl`).
+   - It creates a new key pair and security group, and cleans up these resources after the build and test process.
+   - The AMI is renamed based on the test result (e.g., "PASSED" or "FAILED").
+   - Detailed logging is provided throughout the script to aid in troubleshooting.
 
-   This script performs any necessary cleanup or additional steps after the Packer build is complete.
+2. **Run run-tests.sh script**
+
+   This script launches an EC2 instance from a specified AMI, runs Testinfra tests against it, and then cleans up the resources.
 
    ```bash
-   ./scripts/post-build.sh
+   ./scripts/run-tests.sh -a <ami-id> [-r <region>] [-k <key-name>] [-s <instance-size>] [-t <tests>] [-n]
    ```
 
-## Testing
+   ### Additional Notes:
+   - The script validates the provided AMI ID and ensures all necessary commands are available (`aws`, `curl`, `nc`, `pytest`).
+   - It creates a new key pair and security group, and cleans up these resources after the tests are run, unless the `-n` option is specified to retain infrastructure on error.
+   - The script waits for SSH to become available on the instance before running the Testinfra tests.
+   - The `-t` option allows specifying a custom path to the Testinfra tests (default: `tests/testinfra/test_vm.py`).
 
-Testinfra is used to perform validation tests on the launched EC2 instance. The tests are defined in `tests/testinfra/test_vm.py`.
+3. **Review and customize configuration files**
 
-1. **Run the tests**
+   Before running the build, review and, if necessary, customize the configuration files and scripts to match your specific requirements. This includes adjusting system settings, adding or removing packages, and modifying test scripts.
 
-   The tests are executed automatically by the `pre-build.sh` script after launching the EC2 instance. However, you can run them manually if needed:
+## Troubleshooting
 
-   ```bash
-   pytest --hosts=<hostname> tests/testinfra/test_vm.py
-   ```
+If you encounter issues during the build process, check the following:
 
-## Cleaning Up
-
-The `pre-build.sh` script includes a cleanup function that terminates the EC2 instance and deletes the temporary key pair used during the build process.
+- Ensure all pre-requisites are installed and properly configured.
+- Review the Packer and AWS CLI logs for detailed error messages.
+- Verify network connectivity and AWS service availability.
 
 ## Contributing
 
@@ -99,8 +110,3 @@ Feel free to open issues or submit pull requests with improvements.
 ## License
 
 This project is licensed under the Apache License, Version 2.0. See the [LICENSE](https://www.apache.org/licenses/LICENSE-2.0) file for details.
-```
-
-## Last Updated
-
-2024-08-07
