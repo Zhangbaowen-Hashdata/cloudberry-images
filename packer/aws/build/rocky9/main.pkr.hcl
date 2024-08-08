@@ -106,6 +106,11 @@ build {
     script = "scripts/gpadmin-configure-environment.sh"
   }
 
+  # Provisioner to add the Amazon CloudWatch Agent
+  provisioner "shell" {
+    script = "scripts/system_add_action_runner.sh"
+  }
+
   # Post-processor to generate a manifest file
   post-processors {
     post-processor "manifest" {

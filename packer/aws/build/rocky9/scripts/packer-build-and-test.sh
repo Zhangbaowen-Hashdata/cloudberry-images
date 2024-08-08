@@ -156,7 +156,7 @@ done
 
 # Run Testinfra tests with warnings suppressed
 echo "Running Testinfra tests..."
-pytest -p no:warnings --hosts=rocky@${HOSTNAME} --ssh-identity-file=${PRIVATE_KEY_FILE} "${PROJECT_ROOT}/tests/testinfra/test_vm.py"
+pytest -p no:warnings --hosts=rocky@${HOSTNAME} --ssh-identity-file=${PRIVATE_KEY_FILE} "${PROJECT_ROOT}/tests/testinfra/"
 
 # Rename the AMI to indicate tests have passed
 rename_ami "PASSED"
