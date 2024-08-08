@@ -111,6 +111,11 @@ build {
     script = "scripts/system_add_action_runner.sh"
   }
 
+  # Provisioner to add the Golang
+  provisioner "shell" {
+    script = "scripts/system_add_golang.sh"
+  }
+
   # Post-processor to generate a manifest file
   post-processors {
     post-processor "manifest" {
