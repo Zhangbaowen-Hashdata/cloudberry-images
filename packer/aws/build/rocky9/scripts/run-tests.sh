@@ -163,7 +163,7 @@ done
 
 # Run Testinfra tests with warnings suppressed
 echo "Running Testinfra tests with warnings suppressed..."
-pytest -p no:warnings --hosts=rocky@${HOSTNAME} --ssh-identity-file=${PRIVATE_KEY_FILE} "${PROJECT_ROOT}/tests/testinfra/test_vm.py"
+pytest -p no:warnings --hosts=rocky@${HOSTNAME} --ssh-identity-file=${PRIVATE_KEY_FILE} "${PROJECT_ROOT}/tests/testinfra/"
 
 # Cleanup resources if CLEANUP_ON_ERROR is false
 if ! $CLEANUP_ON_ERROR; then
