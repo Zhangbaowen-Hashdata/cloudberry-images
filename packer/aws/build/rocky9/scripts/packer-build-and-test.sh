@@ -37,6 +37,7 @@ AMI_ID=""
 HOSTNAME=""
 AMI_NAME=""
 CLEANED_UP=false
+BLOCK_PUBLIC_ACCESS_WAS_ENABLED=false
 
 # Function to rename AMI based on the test result
 rename_ami() {
@@ -46,6 +47,53 @@ rename_ami() {
     echo "Renaming AMI to indicate ${result}: ${NEW_NAME}"
     # Update the tag of the AMI
     aws ec2 create-tags --resources ${AMI_ID} --tags Key=Name,Value=${NEW_NAME} --region ${REGION}
+  fi
+}
+
+# Function to check if block public access is enabled
+check_block_public_access() {
+  echo "Checking if block public access for AMIs is enabled..."
+  BLOCK_PUBLIC_ACCESS_STATE=$(aws ec2 get-image-block-public-access-state --region ${REGION} --output text)
+  if [ "$BLOCK_PUBLIC_ACCESS_STATE" == "block-new-sharing" ]; then
+    echo "Block public access for AMIs is enabled."
+    BLOCK_PUBLIC_ACCESS_WAS_ENABLED=true
+  else
+    echo "Block public access for AMIs is not enabled."
+    BLOCK_PUBLIC_ACCESS_WAS_ENABLED=false
+  fi
+}
+
+# Function to disable image block public access
+disable_image_block_public_access() {
+  if [ "$BLOCK_PUBLIC_ACCESS_WAS_ENABLED" == "true" ]; then
+    echo "Disabling block public access for AMIs..."
+    aws ec2 disable-image-block-public-access --region ${REGION}
+    echo "Block public access for AMIs disabled."
+  fi
+}
+
+# Function to re-enable image block public access
+enable_image_block_public_access() {
+  if [ "$BLOCK_PUBLIC_ACCESS_WAS_ENABLED" == "true" ]; then
+    echo "Re-enabling block public access for AMIs..."
+    aws ec2 enable-image-block-public-access --region ${REGION} --image-block-public-access-state block-new-sharing
+    echo "Block public access for AMIs re-enabled."
+  fi
+}
+
+# Function to make the AMI public
+make_ami_public() {
+  if [ -n "${AMI_ID}" ]; then
+    echo "Making AMI public: ${AMI_ID}"
+    aws ec2 modify-image-attribute --image-id ${AMI_ID} --launch-permission "Add=[{Group=all}]" --region ${REGION}
+  fi
+}
+
+# Function to verify the AMI launch permissions
+verify_launch_permissions() {
+  if [ -n "${AMI_ID}" ]; then
+    echo "Verifying launch permissions for AMI: ${AMI_ID}"
+    aws ec2 describe-image-attribute --image-id ${AMI_ID} --attribute launchPermission --region ${REGION}
   fi
 }
 
@@ -160,6 +208,19 @@ pytest -p no:warnings --hosts=rocky@${HOSTNAME} --ssh-identity-file=${PRIVATE_KE
 
 # Rename the AMI to indicate tests have passed
 rename_ami "PASSED"
+
+# Check and potentially disable block public access for AMIs
+check_block_public_access
+disable_image_block_public_access
+
+# Make the AMI public
+make_ami_public
+
+# Verify the launch permissions of the AMI
+verify_launch_permissions
+
+# Re-enable block public access for AMIs if it was originally enabled
+enable_image_block_public_access
 
 # Print completion message
 echo "packer-build-and-test.sh execution completed."
