@@ -1,0 +1,13 @@
+# /etc/security/limits.d/90-db-limits
+
+# Core dump file size limits for gpadmin
+gpadmin soft core unlimited
+gpadmin hard core unlimited
+
+# Open file limits for gpadmin
+gpadmin soft nofile 524288
+gpadmin hard nofile 524288
+
+# Process limits for gpadmin
+gpadmin soft nproc 131072
+gpadmin hard nproc 131072
