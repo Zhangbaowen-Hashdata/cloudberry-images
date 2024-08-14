@@ -17,17 +17,23 @@ jobs:
   cbdb-build-rocky9:
     # This job runs only if changes are detected in the 'docker/cbdb/build/rocky9/' directory.
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'docker/cbdb/build/rocky9') || github.ref == 'refs/heads/main'
+    if: contains(join(github.event.commits.*.added), 'docker/cbdb/build/rocky9/') ||
+        contains(join(github.event.commits.*.modified), 'docker/cbdb/build/rocky9/') ||
+        contains(join(github.event.commits.*.removed), 'docker/cbdb/build/rocky9/')
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        # This step checks out the repository's code so the workflow can access the files needed for the build.
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        # This step logs in to Docker Hub to prevent rate limits when pulling base images.
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+        # This step sets up Docker Buildx, a Docker CLI plugin that extends the Docker command with the full support
+        # of the features provided by Moby BuildKit builder toolkit. It is required for building multi-platform images.
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -35,29 +41,40 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+        # This step configures the AWS credentials needed to authenticate and interact with AWS services like ECR.
 
       - name: Log in to Amazon ECR
         run: aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_PUBLIC_ENDPOINT }}
+        # This step logs in to the Amazon Elastic Container Registry (ECR) public repository using the configured AWS credentials.
+        # It is required before pushing the Docker image to ECR.
 
       - name: Build and tag Docker image for cbdb-build-rocky9
         run: |
           docker build -t ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/rocky9:latest ./docker/cbdb/build/rocky9
           docker push ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/rocky9:latest
+        # This step builds the Docker image from the Dockerfile located in './docker/cbdb/build/rocky9'
+        # and tags it with the latest tag. It then pushes the tagged image to the specified ECR repository.
 
   cbdb-build-ubuntu24:
     # This job runs only if changes are detected in the 'docker/cbdb/build/ubuntu24/' directory.
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'docker/cbdb/build/ubuntu24') || github.ref == 'refs/heads/main'
+    if: contains(join(github.event.commits.*.added), 'docker/cbdb/build/ubuntu24/') ||
+        contains(join(github.event.commits.*.modified), 'docker/cbdb/build/ubuntu24/') ||
+        contains(join(github.event.commits.*.removed), 'docker/cbdb/build/ubuntu24/')
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        # This step checks out the repository's code so the workflow can access the files needed for the build.
 
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_ACCESS_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        # This step logs in to Docker Hub to prevent rate limits when pulling base images.
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+        # This step sets up Docker Buildx, a Docker CLI plugin that extends the Docker command with the full support
+        # of the features provided by Moby BuildKit builder toolkit. It is required for building multi-platform images.
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -65,11 +82,16 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+        # This step configures the AWS credentials needed to authenticate and interact with AWS services like ECR.
 
       - name: Log in to Amazon ECR
         run: aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_PUBLIC_ENDPOINT }}
+        # This step logs in to the Amazon Elastic Container Registry (ECR) public repository using the configured AWS credentials.
+        # It is required before pushing the Docker image to ECR.
 
       - name: Build and tag Docker image for cbdb-build-ubuntu24
         run: |
           docker build -t ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/ubuntu24:latest ./docker/cbdb/build/ubuntu24
           docker push ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/ubuntu24:latest
+        # This step builds the Docker image from the Dockerfile located in './docker/cbdb/build/ubuntu24'
+        # and tags it with the latest tag. It then pushes the tagged image to the specified ECR repository.
