@@ -3,7 +3,6 @@ FROM rockylinux/rockylinux:9
 ARG TIMEZONE_VAR="America/Los_Angeles"
 
 ENV container=docker
-ENV MULTINODE=false
 ENV LANG=en_US.UTF-8
 ENV USER=gpadmin
 
