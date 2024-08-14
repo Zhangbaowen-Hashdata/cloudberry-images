@@ -15,13 +15,13 @@ variable "runner_version" {
 variable "region" {
   description = "The region to build the image in"
   type        = string
-  default     = "eu-west-1"
+  default     = "us-east-1"
 }
 
 variable "default_username" {
   description = "Default username for logging in"
   type        = string
-  default     = "ec2-user"
+  default     = "rocky"
 }
 
 variable "security_group_id" {
@@ -102,7 +102,7 @@ locals {
 }
 
 source "amazon-ebs" "githubrunner" {
-  ami_name                                  = "github-runner-al2023-x86_64-${formatdate("YYYYMMDDhhmm", timestamp())}"
+  ami_name                                  = "github-runner-rocky9-x86_64-${formatdate("YYYYMMDDhhmm", timestamp())}"
   instance_type                             = var.instance_type
   region                                    = var.region
   security_group_id                         = var.security_group_id
@@ -162,7 +162,7 @@ build {
       "sudo systemctl enable amazon-ssm-agent",
       "sudo dnf install -y unzip",
       "sudo curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip",
-      "sudo unzip awscliv2.zip",
+      "sudo unzip -q awscliv2.zip",
       "sudo ./aws/install",
     ], var.custom_shell_commands)
   }
