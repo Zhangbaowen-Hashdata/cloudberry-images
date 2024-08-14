@@ -16,11 +16,8 @@ on:
 jobs:
   cbdb-build-rocky9:
     # This job runs only if changes are detected in the 'docker/cbdb/build/rocky9/' directory.
-    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'docker/cbdb/build/rocky9')
     runs-on: ubuntu-latest
-
-    env:
-      ECR_PUBLIC_ENDPOINT: ${{ secrets.ECR_PUBLIC_ENDPOINT }}  # Use the ECR public endpoint from secrets
+    if: contains(github.event.head_commit.message, 'docker/cbdb/build/rocky9') || github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
@@ -40,20 +37,17 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Log in to Amazon ECR
-        run: aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_PUBLIC_ENDPOINT }}
+        run: aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_PUBLIC_ENDPOINT }}
 
       - name: Build and tag Docker image for cbdb-build-rocky9
         run: |
-          docker build -t ${{ env.ECR_PUBLIC_ENDPOINT }}/cbdb/build/rocky9:latest ./docker/cbdb/build/rocky9
-          docker push ${{ env.ECR_PUBLIC_ENDPOINT }}/cbdb/build/rocky9:latest
+          docker build -t ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/rocky9:latest ./docker/cbdb/build/rocky9
+          docker push ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/rocky9:latest
 
   cbdb-build-ubuntu24:
     # This job runs only if changes are detected in the 'docker/cbdb/build/ubuntu24/' directory.
-    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'docker/cbdb/build/ubuntu24')
     runs-on: ubuntu-latest
-
-    env:
-      ECR_PUBLIC_ENDPOINT: ${{ secrets.ECR_PUBLIC_ENDPOINT }}  # Use the ECR public endpoint from secrets
+    if: contains(github.event.head_commit.message, 'docker/cbdb/build/ubuntu24') || github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
@@ -73,9 +67,9 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Log in to Amazon ECR
-        run: aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_PUBLIC_ENDPOINT }}
+        run: aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_PUBLIC_ENDPOINT }}
 
       - name: Build and tag Docker image for cbdb-build-ubuntu24
         run: |
-          docker build -t ${{ env.ECR_PUBLIC_ENDPOINT }}/cbdb/build/ubuntu24:latest ./docker/cbdb/build/ubuntu24
-          docker push ${{ env.ECR_PUBLIC_ENDPOINT }}/cbdb/build/ubuntu24:latest
+          docker build -t ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/ubuntu24:latest ./docker/cbdb/build/ubuntu24
+          docker push ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/ubuntu24:latest
