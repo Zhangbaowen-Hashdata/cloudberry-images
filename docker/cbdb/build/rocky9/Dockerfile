@@ -168,7 +168,6 @@ RUN cp /tmp/90-cbdb-limits /etc/security/limits.d/90-cbdb-limits && \
 # running the init_system.sh script. The container also mounts the
 # /sys/fs/cgroup volume for systemd compatibility.
 # ----------------------------------------------------------------------
-
 USER gpadmin
 
 VOLUME [ "/sys/fs/cgroup" ]
