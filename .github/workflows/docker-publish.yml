@@ -107,4 +107,3 @@ jobs:
           docker push ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/ubuntu24:latest
         # This step builds the Docker image from the Dockerfile located in './docker/cbdb/build/ubuntu24'
         # and tags it with the latest tag. It then pushes the tagged image to the specified ECR repository.
-'
