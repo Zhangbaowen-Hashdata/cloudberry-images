@@ -1,9 +1,9 @@
 name: Conditional Docker Builds and Pushes to AWS ECR
 
-# This workflow is triggered on push events to the main branch. It only runs jobs
-# if changes are made to specific directories ('docker/cbdb/build/rocky9/**' and 'docker/cbdb/build/ubuntu24/**').
-# The workflow uses the dorny/paths-filter action to determine which files have changed and then conditionally
-# runs Docker build and push jobs based on those changes.
+# This workflow triggers on push events to the main branch, but only when changes are made
+# to files in the specified directories ('docker/cbdb/build/rocky9/**' and 'docker/cbdb/build/ubuntu24/**').
+# It uses the dorny/paths-filter action to determine which directories have changes and
+# then conditionally runs Docker build and push jobs based on those changes.
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Paths filter
         id: filter
-        uses: dorny/paths-filter@v3  # Uses the latest version in the v3.x.x series
+        uses: dorny/paths-filter@v3  # Uses the latest v3.x.x version of the dorny/paths-filter action
         with:
           filters:
             rocky9:
@@ -107,3 +107,4 @@ jobs:
           docker push ${{ secrets.ECR_PUBLIC_ENDPOINT }}/cbdb/build/ubuntu24:latest
         # This step builds the Docker image from the Dockerfile located in './docker/cbdb/build/ubuntu24'
         # and tags it with the latest tag. It then pushes the tagged image to the specified ECR repository.
+'
